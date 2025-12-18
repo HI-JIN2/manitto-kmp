@@ -7,9 +7,14 @@ build/
 .idea/
 *.iml
 
+.kotlin
+
 # OS
 .DS_Store
 
 # Node (Vercel CLI)
 node_modules/
+
+# 환경변수 (민감 정보)
+src/jsMain/resources/config.js
 
