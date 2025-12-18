@@ -1,33 +1,34 @@
 package party.manitto.auth
 
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import kotlinx.browser.document
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 import kotlinx.browser.window
-import org.jetbrains.compose.web.dom.*
-import org.w3c.dom.HTMLDivElement
 
 @Composable
 fun GoogleLoginButton() {
-    var buttonRendered by remember { mutableStateOf(false) }
+    var isLoading by remember { mutableStateOf(false) }
     
     DisposableEffect(Unit) {
-        val clientId = js("window.ENV?.GOOGLE_CLIENT_ID") as? String 
+        val env = window.asDynamic().ENV
+        val clientId = env?.GOOGLE_CLIENT_ID as? String 
             ?: "772988401705-4io9tviphr75k075kb9lbrnmn960h2r8.apps.googleusercontent.com"
         
         // Google Sign-In 초기화
-        js("""
-            if (window.google && window.google.accounts) {
-                window.google.accounts.id.initialize({
-                    client_id: clientId,
-                    callback: function(response) {
-                        window.handleGoogleLogin(response.credential);
-                    }
-                });
-            }
-        """)
+        val google = window.asDynamic().google
+        if (google != null && google.accounts != null) {
+            google.accounts.id.initialize(
+                js("({client_id: clientId, callback: function(response) { window.handleGoogleLogin(response.credential); }})")
+            )
+        }
         
         // Kotlin callback 등록
         window.asDynamic().handleGoogleLogin = { credential: String ->
+            isLoading = true
             AuthState.loginWithGoogle(credential)
         }
         
@@ -36,32 +37,30 @@ fun GoogleLoginButton() {
         }
     }
     
-    Div({
-        attr("id", "google-login-btn")
-        style {
-            property("margin-top", "20px")
-        }
-    }) {
-        DisposableEffect(Unit) {
-            // 버튼 렌더링
-            js("""
-                setTimeout(function() {
-                    if (window.google && window.google.accounts) {
-                        window.google.accounts.id.renderButton(
-                            document.getElementById('google-login-btn'),
-                            { 
-                                theme: 'outline', 
-                                size: 'large',
-                                text: 'signin_with',
-                                shape: 'rectangular'
-                            }
-                        );
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        if (isLoading) {
+            CircularProgressIndicator(
+                color = Color(0xFF667eea),
+                modifier = Modifier.size(40.dp)
+            )
+        } else {
+            Button(
+                onClick = {
+                    val google = window.asDynamic().google
+                    if (google != null && google.accounts != null) {
+                        google.accounts.id.prompt()
                     }
-                }, 100);
-            """)
-            
-            onDispose { }
+                },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color.White,
+                    contentColor = Color(0xFF333333)
+                ),
+                modifier = Modifier.height(50.dp)
+            ) {
+                Text("🔐 Google로 로그인")
+            }
         }
     }
 }
-

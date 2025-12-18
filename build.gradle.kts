@@ -21,11 +21,13 @@ kotlin {
     sourceSets {
         val jsMain by getting {
             dependencies {
-                // Compose Web
-                implementation(compose.html.core)
+                // Compose Multiplatform (Canvas-based, Android-like)
+                implementation(compose.ui)
+                implementation(compose.foundation)
+                implementation(compose.material3)
                 implementation(compose.runtime)
                 
-                // Ktor Client for HTTP requests
+                // Ktor Client
                 implementation("io.ktor:ktor-client-core:2.3.12")
                 implementation("io.ktor:ktor-client-js:2.3.12")
                 implementation("io.ktor:ktor-client-content-negotiation:2.3.12")
@@ -39,3 +41,7 @@ kotlin {
     }
 }
 
+compose {
+    web {
+    }
+}

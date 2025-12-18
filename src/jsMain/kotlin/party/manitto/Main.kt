@@ -1,19 +1,21 @@
 package party.manitto
 
 import androidx.compose.runtime.*
+import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.ui.window.CanvasBasedWindow
 import kotlinx.browser.window
-import org.jetbrains.compose.web.css.Style
-import org.jetbrains.compose.web.renderComposable
 import party.manitto.auth.AuthState
 import party.manitto.ui.*
+import party.manitto.ui.theme.ManittoTheme
 
+@OptIn(ExperimentalComposeUiApi::class)
 fun main() {
-    // 인증 상태 초기화
     AuthState.init()
     
-    renderComposable(rootElementId = "root") {
-        Style(AppStyles)
-        App()
+    CanvasBasedWindow(canvasElementId = "ComposeTarget") {
+        ManittoTheme {
+            App()
+        }
     }
 }
 
@@ -27,7 +29,6 @@ fun App() {
             currentPath = window.location.hash.removePrefix("#")
         }
         window.addEventListener("hashchange", listener)
-        
         onDispose {
             window.removeEventListener("hashchange", listener)
         }
@@ -38,38 +39,32 @@ fun App() {
         currentPath = path
     }
     
-    // 로그인 체크
-    if (AuthState.isLoading) {
-        // 로딩 중
-        return
-    }
+    if (AuthState.isLoading) return
     
     if (AuthState.user == null) {
-        LoginPage()
+        LoginScreen(onLoginSuccess = { /* AuthState handles it */ })
         return
     }
     
     // 라우팅
     when {
         currentPath.isEmpty() || currentPath == "/" -> {
-            CreatePartyPage(onNavigate = navigate)
+            CreatePartyScreen(onNavigate = navigate)
         }
         currentPath.matches(Regex("/party/(\\d+)/join")) -> {
             val partyId = currentPath.substringAfter("/party/").substringBefore("/join")
-            JoinPartyPage(partyId = partyId, onNavigate = navigate)
+            JoinPartyScreen(partyId = partyId, onNavigate = navigate)
         }
         currentPath.matches(Regex("/party/(\\d+)/status")) -> {
             val partyId = currentPath.substringAfter("/party/").substringBefore("/status")
-            PartyStatusPage(partyId = partyId, onNavigate = navigate)
+            PartyStatusScreen(partyId = partyId, onNavigate = navigate)
         }
         currentPath.matches(Regex("/party/(\\d+)/result")) -> {
             val partyId = currentPath.substringAfter("/party/").substringBefore("/result")
-            MatchResultPage(partyId = partyId, onNavigate = navigate)
+            MatchResultScreen(partyId = partyId, onNavigate = navigate)
         }
         else -> {
-            // 404 - 홈으로 리다이렉트
-            CreatePartyPage(onNavigate = navigate)
+            CreatePartyScreen(onNavigate = navigate)
         }
     }
 }
-

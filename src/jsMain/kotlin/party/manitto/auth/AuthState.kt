@@ -53,7 +53,7 @@ object AuthState {
                 val payload = decodeJwt(response.token)
                 user = User(sub = payload.sub, email = payload.email)
             } catch (e: Exception) {
-                console.error("Login failed: ${e.message}")
+                println("Login failed: ${e.message}")
                 window.alert("로그인 실패 😢")
             }
         }
@@ -80,6 +80,3 @@ object AuthState {
         )
     }
 }
-
-private external fun console.error(message: String)
-

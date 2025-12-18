@@ -7,13 +7,17 @@ import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import kotlinx.browser.localStorage
+import kotlinx.browser.window
 import kotlinx.serialization.json.Json
 
 object ApiClient {
-    private val baseUrl: String
-        get() = js("window.ENV?.API_BASE_URL") as? String ?: "http://localhost:8080"
+    val baseUrl: String
+        get() {
+            val env = window.asDynamic().ENV
+            return env?.API_BASE_URL as? String ?: "http://localhost:8080"
+        }
     
-    private val client = HttpClient {
+    val client = HttpClient {
         install(ContentNegotiation) {
             json(Json {
                 ignoreUnknownKeys = true
@@ -22,7 +26,7 @@ object ApiClient {
         }
     }
     
-    private fun getToken(): String? = localStorage.getItem("token")
+    fun getToken(): String? = localStorage.getItem("token")
     
     suspend inline fun <reified T> get(endpoint: String): T {
         return client.get("$baseUrl$endpoint") {
@@ -50,4 +54,3 @@ object ApiClient {
         }.body()
     }
 }
-
