@@ -1,47 +1,36 @@
 package party.manitto.ui
 
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.Text
 import androidx.compose.runtime.*
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.web.css.px
 import party.manitto.api.ApiClient
 import party.manitto.api.MatchResult
-import party.manitto.ui.components.*
 
 @Composable
-fun MatchResultScreen(
-    partyId: String,
-    onNavigate: (String) -> Unit
-) {
+fun MatchResultScreen(partyId: String, onNavigate: (String) -> Unit) {
     var result by remember { mutableStateOf<String?>(null) }
     var isLoading by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
     
-    val scope = rememberCoroutineScope()
+    val scope = MainScope()
     
     GradientBackground {
-        CardContainer {
-            ScreenTitle("🎁 당신의 마니또는...")
+        Card {
+            Title("🎁 당신의 마니또는...")
             
-            Spacer(modifier = Modifier.height(30.dp))
+            Spacer(30.px)
             
             if (result != null) {
                 ResultBox("🎉 $result 🎉")
                 
-                Spacer(modifier = Modifier.height(20.dp))
+                Spacer(20.px)
                 
-                Text(
-                    text = "이 사람에게 몰래 선물을 준비해보세요!",
-                    fontSize = 14.sp,
-                    color = Color(0xFF666666)
-                )
+                Subtitle("이 사람에게 몰래 선물을 준비해보세요!")
             } else {
                 PrimaryButton(
                     text = if (isLoading) "확인 중..." else "결과 보기 👀",
+                    enabled = !isLoading,
                     onClick = {
                         isLoading = true
                         error = null
@@ -56,24 +45,14 @@ fun MatchResultScreen(
                                 isLoading = false
                             }
                         }
-                    },
-                    enabled = !isLoading
+                    }
                 )
             }
             
-            // 에러 메시지
-            error?.let {
-                Spacer(modifier = Modifier.height(15.dp))
-                ErrorMessage(it)
-            }
+            error?.let { ErrorMessage(it) }
             
-            Spacer(modifier = Modifier.height(20.dp))
-            
-            NavLink(
-                text = "← 파티 상태로",
-                onClick = { onNavigate("/party/$partyId/status") }
-            )
+            Spacer(20.px)
+            NavLink("← 파티 상태로") { onNavigate("/party/$partyId/status") }
         }
     }
 }
-

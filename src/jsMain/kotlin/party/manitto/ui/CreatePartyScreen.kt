@@ -1,51 +1,47 @@
 package party.manitto.ui
 
-import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import kotlinx.browser.window
+import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.web.attributes.InputType
+import org.jetbrains.compose.web.css.px
 import party.manitto.api.ApiClient
 import party.manitto.api.CreatePartyRequest
 import party.manitto.api.PartyResponse
-import party.manitto.ui.components.*
 
 @Composable
-fun CreatePartyScreen(
-    onNavigate: (String) -> Unit
-) {
+fun CreatePartyScreen(onNavigate: (String) -> Unit) {
     var partyName by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var isLoading by remember { mutableStateOf(false) }
     
-    val scope = rememberCoroutineScope()
+    val scope = MainScope()
     
     GradientBackground {
-        CardContainer {
-            ScreenTitle("🎉 마니또 방 만들기")
+        Card {
+            Title("🎉 마니또 방 만들기")
             
-            Spacer(modifier = Modifier.height(30.dp))
+            Spacer(30.px)
             
-            ManittoTextField(
+            TextField(
                 value = partyName,
                 onValueChange = { partyName = it },
                 placeholder = "방 이름"
             )
             
-            Spacer(modifier = Modifier.height(15.dp))
-            
-            ManittoTextField(
+            TextField(
                 value = password,
                 onValueChange = { password = it },
                 placeholder = "비밀번호",
-                isPassword = true
+                type = InputType.Password
             )
             
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(5.px)
             
             PrimaryButton(
                 text = if (isLoading) "생성 중..." else "방 만들기 ✨",
+                enabled = !isLoading,
                 onClick = {
                     if (partyName.isBlank() || password.isBlank()) {
                         window.alert("방 이름과 비밀번호를 입력해주세요!")
@@ -68,10 +64,8 @@ fun CreatePartyScreen(
                             isLoading = false
                         }
                     }
-                },
-                enabled = !isLoading
+                }
             )
         }
     }
 }
-

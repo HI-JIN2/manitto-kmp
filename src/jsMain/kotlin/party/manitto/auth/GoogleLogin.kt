@@ -1,66 +1,64 @@
 package party.manitto.auth
 
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
+import kotlinx.browser.document
 import kotlinx.browser.window
+import org.jetbrains.compose.web.css.*
+import org.jetbrains.compose.web.dom.*
 
 @Composable
 fun GoogleLoginButton() {
     var isLoading by remember { mutableStateOf(false) }
     
     DisposableEffect(Unit) {
-        val env = window.asDynamic().ENV
-        val clientId = env?.GOOGLE_CLIENT_ID as? String 
-            ?: "772988401705-4io9tviphr75k075kb9lbrnmn960h2r8.apps.googleusercontent.com"
-        
-        // Google Sign-In 초기화
-        val google = window.asDynamic().google
-        if (google != null && google.accounts != null) {
-            google.accounts.id.initialize(
-                js("({client_id: clientId, callback: function(response) { window.handleGoogleLogin(response.credential); }})")
-            )
-        }
-        
         // Kotlin callback 등록
         window.asDynamic().handleGoogleLogin = { credential: String ->
             isLoading = true
             AuthState.loginWithGoogle(credential)
         }
         
+        // Google Sign-In 초기화
+        window.setTimeout({
+            val env = window.asDynamic().ENV
+            val clientId = (env?.GOOGLE_CLIENT_ID as? String)?.takeIf { it.isNotBlank() }
+                ?: return@setTimeout
+            
+            val google = window.asDynamic().google
+            if (google != null && google.accounts != null) {
+                val config = js("{}")
+                config.client_id = clientId
+                config.callback = js("(function(r) { window.handleGoogleLogin(r.credential); })")
+                google.accounts.id.initialize(config)
+                
+                val btnConfig = js("{}")
+                btnConfig.theme = "outline"
+                btnConfig.size = "large"
+                btnConfig.text = "signin_with"
+                google.accounts.id.renderButton(document.getElementById("google-btn"), btnConfig)
+            }
+        }, 500)
+        
         onDispose {
             window.asDynamic().handleGoogleLogin = null
         }
     }
     
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        if (isLoading) {
-            CircularProgressIndicator(
-                color = Color(0xFF667eea),
-                modifier = Modifier.size(40.dp)
-            )
-        } else {
-            Button(
-                onClick = {
-                    val google = window.asDynamic().google
-                    if (google != null && google.accounts != null) {
-                        google.accounts.id.prompt()
-                    }
-                },
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color.White,
-                    contentColor = Color(0xFF333333)
-                ),
-                modifier = Modifier.height(50.dp)
-            ) {
-                Text("🔐 Google로 로그인")
+    if (isLoading) {
+        Div({
+            style {
+                fontSize(18.px)
+                color(Color("#667eea"))
             }
+        }) {
+            Text("⏳ 로그인 중...")
         }
+    } else {
+        Div({
+            id("google-btn")
+            style {
+                display(DisplayStyle.Flex)
+                justifyContent(JustifyContent.Center)
+            }
+        })
     }
 }

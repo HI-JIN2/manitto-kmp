@@ -1,5 +1,5 @@
 {
-  "buildCommand": "./gradlew jsBrowserDistribution",
+  "buildCommand": "./gradlew jsBrowserDistribution && node scripts/inject-env.js",
   "outputDirectory": "build/dist/js/productionExecutable",
   "installCommand": "echo 'Using Gradle'",
   "framework": null,
@@ -7,4 +7,3 @@
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
-

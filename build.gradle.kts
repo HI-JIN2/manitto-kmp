@@ -21,10 +21,8 @@ kotlin {
     sourceSets {
         val jsMain by getting {
             dependencies {
-                // Compose Multiplatform (Canvas-based, Android-like)
-                implementation(compose.ui)
-                implementation(compose.foundation)
-                implementation(compose.material3)
+                // Compose HTML (안정적)
+                implementation(compose.html.core)
                 implementation(compose.runtime)
                 
                 // Ktor Client
@@ -38,11 +36,6 @@ kotlin {
                 implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
             }
         }
-    }
-}
-
-compose {
-    web {
     }
 }
 

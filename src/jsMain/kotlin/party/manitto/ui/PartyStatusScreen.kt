@@ -1,37 +1,23 @@
 package party.manitto.ui
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Text
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import kotlinx.browser.window
+import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.web.css.px
 import party.manitto.api.ApiClient
 import party.manitto.api.Participant
 import party.manitto.api.PartyStatus
-import party.manitto.ui.components.*
 
 @Composable
-fun PartyStatusScreen(
-    partyId: String,
-    onNavigate: (String) -> Unit
-) {
+fun PartyStatusScreen(partyId: String, onNavigate: (String) -> Unit) {
     var participants by remember { mutableStateOf<List<Participant>>(emptyList()) }
     var isMatched by remember { mutableStateOf(false) }
     var isLoading by remember { mutableStateOf(true) }
     var isMatching by remember { mutableStateOf(false) }
     var message by remember { mutableStateOf<String?>(null) }
     
-    val scope = rememberCoroutineScope()
+    val scope = MainScope()
     
     // 데이터 로드
     LaunchedEffect(partyId) {
@@ -48,13 +34,13 @@ fun PartyStatusScreen(
     }
     
     GradientBackground {
-        CardContainer {
-            ScreenTitle("👥 파티 참가자 목록")
+        Card {
+            Title("👥 파티 참가자 목록")
             
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(20.px)
             
             if (isLoading) {
-                CircularProgressIndicator(color = Color(0xFF667eea))
+                LoadingSpinner()
             } else {
                 // 초대 링크 복사
                 SecondaryButton(
@@ -66,32 +52,24 @@ fun PartyStatusScreen(
                     }
                 )
                 
-                Spacer(modifier = Modifier.height(20.dp))
+                Spacer(20.px)
                 
                 // 참가자 목록
                 if (participants.isEmpty()) {
-                    Text(
-                        text = "아직 참가자가 없습니다.",
-                        color = Color(0xFF666666)
-                    )
+                    Subtitle("아직 참가자가 없습니다.")
                 } else {
-                    Column(
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        participants.forEach { participant ->
-                            ParticipantItem(email = participant.email)
-                            Spacer(modifier = Modifier.height(8.dp))
-                        }
+                    participants.forEach { participant ->
+                        ParticipantItem(participant.email)
                     }
                 }
                 
-                Spacer(modifier = Modifier.height(20.dp))
+                Spacer(20.px)
                 
                 // 매칭 상태
                 if (isMatched) {
                     SuccessMessage("🎁 이미 매칭이 완료된 파티입니다!")
                     
-                    Spacer(modifier = Modifier.height(15.dp))
+                    Spacer(15.px)
                     
                     PrimaryButton(
                         text = "내 마니또 확인하기",
@@ -100,6 +78,7 @@ fun PartyStatusScreen(
                 } else {
                     PrimaryButton(
                         text = if (isMatching) "매칭 중..." else "매칭 시작 🎁",
+                        enabled = !isMatching,
                         onClick = {
                             isMatching = true
                             scope.launch {
@@ -114,14 +93,13 @@ fun PartyStatusScreen(
                                     isMatching = false
                                 }
                             }
-                        },
-                        enabled = !isMatching
+                        }
                     )
                 }
                 
                 // 메시지
                 message?.let { msg ->
-                    Spacer(modifier = Modifier.height(15.dp))
+                    Spacer(15.px)
                     if (msg.contains("완료")) {
                         SuccessMessage(msg)
                     } else {
@@ -130,32 +108,8 @@ fun PartyStatusScreen(
                 }
             }
             
-            Spacer(modifier = Modifier.height(20.dp))
-            
-            NavLink(
-                text = "← 홈으로",
-                onClick = { onNavigate("/") }
-            )
+            Spacer(20.px)
+            NavLink("← 홈으로") { onNavigate("/") }
         }
     }
 }
-
-@Composable
-private fun ParticipantItem(email: String) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(
-                color = Color(0xFFF8F9FA),
-                shape = RoundedCornerShape(8.dp)
-            )
-            .padding(12.dp)
-    ) {
-        Text(
-            text = "👤 $email",
-            fontSize = 14.sp,
-            color = Color(0xFF555555)
-        )
-    }
-}
-

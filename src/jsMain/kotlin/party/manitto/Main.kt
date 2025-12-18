@@ -1,21 +1,16 @@
 package party.manitto
 
 import androidx.compose.runtime.*
-import androidx.compose.ui.ExperimentalComposeUiApi
-import androidx.compose.ui.window.CanvasBasedWindow
 import kotlinx.browser.window
+import org.jetbrains.compose.web.renderComposable
 import party.manitto.auth.AuthState
 import party.manitto.ui.*
-import party.manitto.ui.theme.ManittoTheme
 
-@OptIn(ExperimentalComposeUiApi::class)
 fun main() {
     AuthState.init()
     
-    CanvasBasedWindow(canvasElementId = "ComposeTarget") {
-        ManittoTheme {
-            App()
-        }
+    renderComposable(rootElementId = "root") {
+        App()
     }
 }
 
@@ -42,7 +37,7 @@ fun App() {
     if (AuthState.isLoading) return
     
     if (AuthState.user == null) {
-        LoginScreen(onLoginSuccess = { /* AuthState handles it */ })
+        LoginScreen()
         return
     }
     
