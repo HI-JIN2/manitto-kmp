@@ -154,6 +154,31 @@ fun SecondaryButton(
 }
 
 @Composable
+fun KakaoShareButton(
+    text: String = "카카오톡으로 공유 💬",
+    onClick: () -> Unit
+) {
+    Button({
+        style {
+            width(100.percent)
+            padding(15.px)
+            fontSize(16.px)
+            fontWeight(600)
+            color(Color("#3C1E1E"))
+            backgroundColor(Color("#FEE500"))
+            border(0.px)
+            borderRadius(10.px)
+            cursor("pointer")
+            marginTop(10.px)
+            property("transition", "all 0.3s")
+        }
+        onClick { onClick() }
+    }) {
+        Text(text)
+    }
+}
+
+@Composable
 fun NavLink(text: String, onClick: () -> Unit) {
     A(attrs = {
         style {
@@ -250,4 +275,3 @@ fun LoadingSpinner() {
         Text("⏳ 로딩 중...")
     }
 }
-

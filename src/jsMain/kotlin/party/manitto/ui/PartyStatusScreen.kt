@@ -42,7 +42,15 @@ fun PartyStatusScreen(partyId: String, onNavigate: (String) -> Unit) {
             if (isLoading) {
                 LoadingSpinner()
             } else {
-                // 초대 링크 복사
+                // 카카오톡 공유 버튼
+                KakaoShareButton(
+                    text = "카카오톡으로 초대하기 💬",
+                    onClick = {
+                        KakaoShare.sharePartyInvite(partyId, "마니또 파티")
+                    }
+                )
+                
+                // 링크 복사 버튼
                 SecondaryButton(
                     text = "초대 링크 복사 📋",
                     onClick = {
